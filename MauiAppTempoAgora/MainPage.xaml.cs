@@ -27,8 +27,8 @@ namespace MauiAppTempoAgora
                         dados_previsao = $"Latitude: {t.lat} \n" +
                                          $"Longitude: {t.lon} \n" +
                                          $"Descrição: {t.description} \n" +
-                                         $"Condição: {t.main} \n" +
-                                         $"Visibilidade: {t.visibility} \n" +
+                                         $"Velocidade do vento: {t.speed} km/h \n" +
+                                         $"Visibilidade: {t.visibility} m \n" +
                                          $"Nascer do Sol: {t.sunrise} \n" +
                                          $"Por do Sol: {t.sunset} \n" +
                                          $"Temp Máx: {t.temp_max} \n" +
