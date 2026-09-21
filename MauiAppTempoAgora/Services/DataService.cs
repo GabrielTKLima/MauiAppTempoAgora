@@ -1,5 +1,7 @@
 ﻿using MauiAppTempoAgora.Models;
 using Newtonsoft.Json.Linq;
+using System.Net;
+using System.Net.Http;
 
 namespace MauiAppTempoAgora.Services
 {
@@ -16,34 +18,50 @@ namespace MauiAppTempoAgora.Services
 
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage resp = await client.GetAsync(url);
-
-                if (resp.IsSuccessStatusCode)
+                try
                 {
-                    string json = await resp.Content.ReadAsStringAsync();
+                    HttpResponseMessage resp = await client.GetAsync(url);
 
-                    var rascunho = JObject.Parse(json);
-
-                    DateTime time = new();
-                    DateTime sunrise = time.AddSeconds((double)rascunho["sys"]["sunrise"]).ToLocalTime();
-                    DateTime sunset = time.AddSeconds((double)rascunho["sys"]["sunset"]).ToLocalTime();
-
-                    t = new()
+                    if (resp.IsSuccessStatusCode)
                     {
-                        lat = (double)rascunho["coord"]["lat"],
-                        lon = (double)rascunho["coord"]["lon"],
-                        description = (string)rascunho["weather"][0]["description"],
-                        main = (string)rascunho["weather"][0]["main"],
-                        temp_min = (double)rascunho["main"]["temp_min"],
-                        temp_max = (double)rascunho["main"]["temp_max"],
-                        speed = (double)rascunho["wind"]["speed"],
-                        visibility = (int)rascunho["visibility"],
-                        sunrise = sunrise.ToString(),
-                        sunset = sunset.ToString(),
-                    }; // Fecha obj do Tempo.
-                } // Fecha if se o status do servidor foi de sucesso
-            } // fecha laço using
+                        string json = await resp.Content.ReadAsStringAsync();
 
+                        var rascunho = JObject.Parse(json);
+
+                        DateTime time = new();
+                        DateTime sunrise = time.AddSeconds((double)rascunho["sys"]["sunrise"]).ToLocalTime();
+                        DateTime sunset = time.AddSeconds((double)rascunho["sys"]["sunset"]).ToLocalTime();
+
+                        t = new()
+                        {
+                            lat = (double)rascunho["coord"]["lat"],
+                            lon = (double)rascunho["coord"]["lon"],
+                            description = (string)rascunho["weather"][0]["description"],
+                            main = (string)rascunho["weather"][0]["main"],
+                            temp_min = (double)rascunho["main"]["temp_min"],
+                            temp_max = (double)rascunho["main"]["temp_max"],
+                            speed = (double)rascunho["wind"]["speed"],
+                            visibility = (int)rascunho["visibility"],
+                            sunrise = sunrise.ToString(),
+                            sunset = sunset.ToString(),
+                        };
+                    }
+                    else
+                    {
+                        if (resp.StatusCode == HttpStatusCode.NotFound)
+                            throw new Exception("Cidade não encontrada");
+                        else if (resp.StatusCode == HttpStatusCode.Unauthorized)
+                            throw new Exception("Chave de API inválida");
+                        else
+                            throw new Exception($"Erro ao buscar dados: {(int)resp.StatusCode} - {resp.ReasonPhrase}");
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    // Erro de rede/sem conexão
+                    throw new Exception("Sem conexão com a internet");
+                }
+            }
             return t;
         }
     }
