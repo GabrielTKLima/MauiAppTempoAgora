@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MauiAppTempoAgora.Models
+﻿namespace MauiAppTempoAgora.Models
 {
     internal class Tempo
     {
